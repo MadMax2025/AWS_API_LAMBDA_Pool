@@ -73,5 +73,5 @@ pip install mysql-connector-python==8.4.0 -t ./lib/layers/mysqlConnector/python/
 
 
 # download repository
-git clone https://github.com/Emilita2006/1-ApiLambdaMysqlAws.git
+git clone https://github.com/MadMax2025/AWS_API_LAMBDA_Pool.git
 
