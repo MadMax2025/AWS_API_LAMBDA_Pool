@@ -13,7 +13,7 @@ python3.9 --version
 python3.9 -c "import ssl; print(ssl.OPENSSL_VERSION)"
 cd ..
 sudo rm -rf Python-3.9.19*
-
+sudo apt install python3-pip
 
 # Create profile aws cli
 sudo apt install unzip
