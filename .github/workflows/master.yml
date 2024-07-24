@@ -1,45 +1,45 @@
 
-name: Deploy Application
+name: Deploy AWS CDK
+
 on:
   push:
-    branches: [ master ]  # Change to your desired branch
+    branches:
+      - main
 
 jobs:
-                 
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}  
-      AWS_SECRET_ACCESS_KEY: ${{ vars.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-                
-      - name: Create AWS credentials file
-        run: |
-          mkdir -p $HOME/.aws
-          cat > $HOME/.aws/credentials << EOF
-          [default]
-          aws_access_key_id=$AWS_ACCESS_KEY_ID
-          aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
-          region=$AWS_DEFAULT_REGION
-          EOF
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Configure Environment Variables
-        run: |
-          export CDK_DEFAULT_ACCOUNT=${{ vars.CDK_DEFAULT_ACCOUNT }}
-          export CDK_DEFAULT_REGION=${{ vars.CDK_DEFAULT_REGION }}
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'
 
-      - name: Install dependencies
-        run: cd $GITHUB_WORKSPACE/ utpc-cdk  && npm install
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
 
-      - name: Synthesize AWS CDK stack
-        run: cd $GITHUB_WORKSPACE/ utpc-cdk && npx cdk synth
+    
 
-      - name: Deploy AWS CDK stack
-        run: |
-          echo "Deploying stack..."
-          cd $GITHUB_WORKSPACE/utpc-cdk && npx cdk deploy --all --require-approval=never
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Install dependencies
+      run: |
+        npm install -g aws-cdk
+        npm install
+
+    - name: Build CDK project
+      run: npm run build
+
+    - name: Deploy CDK stack
+      run: cdk deploy --profile awsUtpc --require-approval never
