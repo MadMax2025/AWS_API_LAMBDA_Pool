@@ -99,10 +99,10 @@ def lambda_handler(event, context):
 
     if tipoDesposito == 'Cambio de Clave':
       updateKey(idTarjetNumber,newKey, tipoDesposito)
-      email_subject = "Cambio de Clave"
+      email_subject = "Cambio de Clave, elabordo Paul Ramos"
       
       response_email = send_html_email(ENV_SES_EMAIL_FROM, 
-                                 "plrmsr@gmail.com",
+                                 "racorrea2@utpl.edu.ec",
                                  email_subject)
       print(f"Email sent sucessfully: {response_email}")
       
