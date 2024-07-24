@@ -1,41 +1,46 @@
 
-name: Deploy AWS CDK
+name: Deploy Application
 
 on:
   push:
-    branches:
-      - main
+    branches: [ master ]  # Cambia a tu rama deseada
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
+      CDK_DEFAULT_REGION: ${{ secrets.CDK_DEFAULT_REGION }}
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '20'
+      - name: Create AWS credentials file
+        run: |
+          mkdir -p $HOME/.aws
+          cat > $HOME/.aws/credentials << EOF
+          [default]
+          aws_access_key_id=$AWS_ACCESS_KEY_ID
+          aws_secret_access_key=$AWS_SECRET_ACCESS_KEY
+          region=$AWS_DEFAULT_REGION
+          EOF
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          cd $GITHUB_WORKSPACE/utpc-cdk
+          npm install
 
-    
+      - name: Synthesize AWS CDK stack
+        run: |
+          cd $GITHUB_WORKSPACE/utpc-cdk
+          npx cdk synth
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    
-    - name: Build CDK project
-      run: npm run build
-
-    - name: Deploy CDK stack
-      run: cdk deploy --profile awsUtpc --require-approval never
+      - name: Deploy AWS CDK stack
+        run: |
+          cd $GITHUB_WORKSPACE/utpc-cdk
+          npx cdk deploy --all --require-approval=never
