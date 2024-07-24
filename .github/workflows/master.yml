@@ -33,11 +33,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Install dependencies
-      run: |
-        npm install -g aws-cdk
-        npm install
-
+    
     - name: Build CDK project
       run: npm run build
 
