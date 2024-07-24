@@ -1,11 +1,13 @@
 import * as cdk from 'aws-cdk-lib';
-import { Role, ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { Role, ServicePrincipal, ManagedPolicy, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Function, Runtime, Code, LayerVersion } from 'aws-cdk-lib/aws-lambda';
 import { RestApi, Cors, MethodLoggingLevel, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
 import { Duration } from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import path = require('path');
 import * as dotenv from 'dotenv';
+
+
 
 dotenv.config();
 
@@ -17,12 +19,16 @@ export class UtpcCdkStack extends cdk.Stack {
 
     const utpcRole = new Role(this, 'utpcRole', {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'), 
-      roleName: 'utpcRole'
+      roleName: 'utpcRole',
+      description: 'role for utpc micro',
     });
 
     utpcRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess'));
     utpcRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('CloudWatchLogsFullAccess'));
+    utpcRole.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonSESFullAccess')); //permisos para mandar mails
 
+
+    
 
     //   Contruccion de la capa mysqlConnector//
 
@@ -49,6 +55,7 @@ export class UtpcCdkStack extends cdk.Stack {
         ENV_PASSWORD_MYSQL: process.env.ENV_PASSWORD_MYSQL || 'default-value',
         ENV_DATABASE_MYSQL: process.env.ENV_DATABASE_MYSQL || 'default-value',
         ENV_PORT_MYSQL: process.env.ENV_PORT_MYSQL || 'default-value',
+        ENV_SES_EMAIL_FROM: process.env.ENV_SES_EMAIL_FROM || 'default-value', //FROM process.env.ENV_SES_REGION || 'default-value',
       },
     });
 
@@ -66,6 +73,7 @@ export class UtpcCdkStack extends cdk.Stack {
         ENV_PASSWORD_MYSQL: process.env.ENV_PASSWORD_MYSQL || 'default-value',
         ENV_DATABASE_MYSQL: process.env.ENV_DATABASE_MYSQL || 'default-value',
         ENV_PORT_MYSQL: process.env.ENV_PORT_MYSQL || 'default-value',
+        ENV_SES_EMAIL_FROM: process.env.ENV_SES_EMAIL_FROM || 'default-value', //FROM process.env.ENV_SES_REGION || 'default-value',
       },
     });
 
@@ -83,6 +91,19 @@ export class UtpcCdkStack extends cdk.Stack {
         ENV_PASSWORD_MYSQL: process.env.ENV_PASSWORD_MYSQL || 'default-value',
         ENV_DATABASE_MYSQL: process.env.ENV_DATABASE_MYSQL || 'default-value',
         ENV_PORT_MYSQL: process.env.ENV_PORT_MYSQL || 'default-value',
+        ENV_SES_EMAIL_FROM: process.env.ENV_SES_EMAIL_FROM || 'default-value', //FROM process.env.ENV_SES_REGION || 'default-value',
+      },
+    });
+
+    const verifyEmail = new Function(this, 'verifyEmail', {
+      runtime: Runtime.PYTHON_3_9, 
+      handler: 'main.lambda_handler',
+      code: Code.fromAsset(path.join(__dirname, './microservices/verifyEmail')),
+      functionName: 'verifyEmail',
+      timeout: Duration.minutes(1),
+      role: utpcRole,
+      environment: {
+        ENV_SES_EMAIL_FROM: process.env.ENV_SES_EMAIL_FROM || 'default-value', //FROM process.env.ENV_SES_REGION || 'default-value',
       },
     });
 
@@ -134,6 +155,9 @@ export class UtpcCdkStack extends cdk.Stack {
     const createUtpcCreateDDL = new LambdaIntegration(utpcCreateDDL,
       {allowTestInvoke: false,});
 
+    const createVerifyEmail = new LambdaIntegration(verifyEmail,
+      {allowTestInvoke: false,});
+
 
     //Crear metodos para las nuevas APIS//
 
@@ -148,6 +172,9 @@ export class UtpcCdkStack extends cdk.Stack {
 
     const resourceUtpcCreateDDL = utpcApi.root.addResource("utpcCreateDDL");
     resourceUtpcCreateDDL.addMethod("POST", createUtpcCreateDDL);
+
+    const resourceVerifyEmail = utpcApi.root.addResource("verifyEmail");
+    resourceVerifyEmail.addMethod("POST", createVerifyEmail);
 
   }
 }

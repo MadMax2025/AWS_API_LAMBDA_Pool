@@ -1,4 +1,4 @@
-import json, os
+import json, os, boto3
 import mysql.connector
 
 ENV_HOST_MYSQL = os.getenv("ENV_HOST_MYSQL")
@@ -6,6 +6,7 @@ ENV_USER_MYSQL = os.getenv("ENV_USER_MYSQL")
 ENV_PASSWORD_MYSQL = os.getenv("ENV_PASSWORD_MYSQL")
 ENV_DATABASE_MYSQL = os.getenv("ENV_DATABASE_MYSQL")
 ENV_PORT_MYSQL = os.getenv("ENV_PORT_MYSQL")
+ENV_SES_EMAIL_FROM = os.getenv("ENV_SES_EMAIL_FROM") # ses_eil_from = os.getenv("ENV_SES_MAIL_FROM")
 
 headers = {
         "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,40 @@ headers = {
         "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
     }
 
+def send_html_email(email_source,email_destination,subject):
+    ses_client = boto3.client("ses")
+    CHARSET = "UTF-8"
+    HTML_EMAIL_CONTENT = f"""
+      <html>
+        <head></head>
+        <h1 style='text-align:center'>{subject}</h1>
+        <p>Se realizo el {subject}</p>
+        </body>
+      </html>
+    """
+
+    response = ses_client.send_email(
+        Destination={
+          "ToAddresses": [
+            email_destination,
+          ],
+        },
+        Message={
+          "Body": {
+            "Html": {
+              "Charset": CHARSET,
+              "Data": HTML_EMAIL_CONTENT,
+            }
+          },
+          "Subject": {
+            "Charset": CHARSET,
+            "Data": subject,
+          },
+        },
+        Source=email_source,
+    )
+
+    return response
 
 def depositMoney(idTarjetNumber, tipoDesposito, monto):
   try:
@@ -63,7 +98,13 @@ def lambda_handler(event, context):
 
     if tipoDesposito == 'Deposito':
       depositMoney(idTarjetNumber, tipoDesposito, monto)
-
+      email_subject = f"Deposito de {monto} realizado"
+      
+      response_email = send_html_email(ENV_SES_EMAIL_FROM,
+                                 "plrmsr@gmail.com",
+                                 email_subject)
+      print(f"Email sent successfully: {response_email}")  # lo tiene vacio
+      
       return {
           "statusCode": 200,
           "headers": headers,
