@@ -110,14 +110,13 @@ def lambda_handler(event, context):
     print("holla")
     connect_to_db()
     
-    email_subject = "Cuenta de Tablas" # "Cuenta Creada"
+    email_subject = "Cuenta de Tablas" 
     
     response_email = send_html_email(ENV_SES_EMAIL_FROM, 
                                "racorrea2@utpl.edu.ec", 
                                 email_subject)
     
-    print(f"Email sent successfully: {response_email}") # print(response_email)
-    
+    print(f"Email sent successfully: {response_email}") 
     return {
         "statusCode": 200,
         "headers": headers,

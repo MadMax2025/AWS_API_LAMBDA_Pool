@@ -103,7 +103,7 @@ def lambda_handler(event, context):
                                  
                                   email_subject)
       
-      print(f"Email sent successfully: {response_email}") # print(response_email)
+      print(f"Email sent successfully: {response_email}") 
       
       return {
           "statusCode": 200,

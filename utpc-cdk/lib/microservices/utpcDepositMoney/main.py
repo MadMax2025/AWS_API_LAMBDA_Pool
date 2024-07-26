@@ -104,7 +104,7 @@ def lambda_handler(event, context):
                                  "racorrea2@utpl.edu.ec",
                                  
                                  email_subject)
-      print(f"Email sent successfully: {response_email}")  # lo tiene vacio
+      print(f"Email sent successfully: {response_email}")  
       
       return {
           "statusCode": 200,
