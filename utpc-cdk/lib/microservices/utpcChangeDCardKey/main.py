@@ -95,7 +95,7 @@ def lambda_handler(event, context):
 
     idTarjetNumber = body_dict['idTarjetNumber']
     tipoDesposito = body_dict['tipoDesposito']
-    newKey = body_dict['newKey']
+    newKey = body_dict['newKey'] # verifica new key
 
     if tipoDesposito == 'Cambio de Clave':
       updateKey(idTarjetNumber,newKey, tipoDesposito)

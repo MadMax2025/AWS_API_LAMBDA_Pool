@@ -72,7 +72,7 @@ def depositMoney(idTarjetNumber, tipoDesposito, monto):
     """)
 
     conn.commit()
-    print(f"Key updated successfully for idTarjetNumber: {idTarjetNumber}")
+    print(f"Key updated successfully for idTarjetNumber: {idTarjetNumber}") # verifica el id de la tarjeta
 
   except mysql.connector.Error as e:
     print(f"Error connecting to MySQL: {e}")

@@ -67,11 +67,11 @@ def withdrawMoney( idTarjetNumber, tipoDesposito, monto):
     cursor.execute(f"""
       UPDATE CuentaBancaria
       SET saldo = saldo - {monto}
-      WHERE id = '{idTarjetNumber}';
+      WHERE id = '{idTarjetNumber}'; 
     """)
 
     conn.commit()
-    print(f"Key updated successfully for idTarjetNumber: {idTarjetNumber}")
+    print(f"Key updated successfully for idTarjetNumber: {idTarjetNumber}") # muestra el nuevo saldo
 
   except mysql.connector.Error as e:
     print(f"Error connecting to MySQL: {e}")
