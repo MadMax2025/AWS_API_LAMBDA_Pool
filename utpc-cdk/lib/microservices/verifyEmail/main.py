@@ -25,7 +25,8 @@ def lambda_handler(event, context):
     body = event['body']
     body_dict = json.loads(body)
     print(f"body_dict: {body_dict}  [lambda_handler]")
-# body
+    
+# body para hacer el request de verificacion de correo
     email = body_dict['email']
 
     verify_email_identity(email)
