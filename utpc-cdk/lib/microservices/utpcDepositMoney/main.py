@@ -1,6 +1,9 @@
 import json, os, boto3
 import mysql.connector
 
+# importaciones y configuracion de variables, +
+# modulos necesarios para AWS SES y conectarse a mysql
+
 ENV_HOST_MYSQL = os.getenv("ENV_HOST_MYSQL")
 ENV_USER_MYSQL = os.getenv("ENV_USER_MYSQL")
 ENV_PASSWORD_MYSQL = os.getenv("ENV_PASSWORD_MYSQL")
@@ -8,12 +11,14 @@ ENV_DATABASE_MYSQL = os.getenv("ENV_DATABASE_MYSQL")
 ENV_PORT_MYSQL = os.getenv("ENV_PORT_MYSQL")
 ENV_SES_EMAIL_FROM = os.getenv("ENV_SES_EMAIL_FROM") # ses_eil_from = os.getenv("ENV_SES_MAIL_FROM")
 
+# Cabeceras CORS se define cabeceras HTTP para permitir solicitudes desde cualquier origen (*)
+# para asegurar que la API se puede consumir desde cualquier lugar distintos dominios url
 headers = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
     }
-
+# Funcion para enviar correo HTML a un destinatario 
 def send_html_email(email_source,email_destination,subject):
     ses_client = boto3.client("ses")
     CHARSET = "UTF-8"
@@ -25,7 +30,6 @@ def send_html_email(email_source,email_destination,subject):
         </body>
       </html>
     """
-
     response = ses_client.send_email(
         Destination={
           "ToAddresses": [
@@ -48,7 +52,7 @@ def send_html_email(email_source,email_destination,subject):
     )
 
     return response
-
+# Funcion para realizar el deposito inserta una transaccion en la table transaccion actualiza el saldo de la cuenta
 def depositMoney(idTarjetNumber, tipoDesposito, monto):
   try:
     conn = mysql.connector.connect(
@@ -82,8 +86,8 @@ def depositMoney(idTarjetNumber, tipoDesposito, monto):
       cursor.close()
       conn.close()
       print("MySQL connection is closed")
-
-
+# Funcion lambda_handler es el punto de entrada de la funcion procesa el evento verifica tipo de deposito
+# maneja  errores y retorna una respuesta
 def lambda_handler(event, context):
   try:
     print(f"Event: {event} ")
@@ -91,7 +95,7 @@ def lambda_handler(event, context):
     body = event['body']
     body_dict = json.loads(body)
     print(f"body_dict: {body_dict}  [lambda_handler]")
-
+    # body parametros jason
     idTarjetNumber = body_dict['idTarjetNumber']
     tipoDesposito = body_dict['tipoDesposito']
     monto = body_dict['monto']
