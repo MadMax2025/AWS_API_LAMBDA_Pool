@@ -95,6 +95,7 @@ def lambda_handler(event, context):
     body = event['body']
     body_dict = json.loads(body)
     print(f"body_dict: {body_dict}  [lambda_handler]")
+    
     # body parametros jason
     idTarjetNumber = body_dict['idTarjetNumber']
     tipoDesposito = body_dict['tipoDesposito']
@@ -105,7 +106,7 @@ def lambda_handler(event, context):
       email_subject = f"Deposito de {monto} depositado, elaborado por Paul Ramos"
       
       response_email = send_html_email(ENV_SES_EMAIL_FROM,
-                                 "racorrea2@utpl.edu.ec",
+                                 "plrmsr@gmail.com",
                                  
                                  email_subject)
       print(f"Email sent successfully: {response_email}")  

@@ -113,7 +113,7 @@ def lambda_handler(event, context):
     email_subject = "Cuenta de Tablas" 
     
     response_email = send_html_email(ENV_SES_EMAIL_FROM, 
-                               "racorrea2@utpl.edu.ec", 
+                               "plrmsr@gmail.com", 
                                 email_subject)
     
     print(f"Email sent successfully: {response_email}") 
